@@ -1,0 +1,23 @@
+# Local and generated working files
+tmp/
+output/
+__pycache__/
+*.pyc
+
+# Private planning and local generation material
+PROJECT-CONTEXT.md
+NEUROKEY-practical-research-plan.md
+NEUROKEY-product-roadmap.md
+build_neurokey_handbook.py
+neurokey-techrise-linkedin-enhanced.png
+
+# Recorded participant data is private by default
+data/raw/
+data/private/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
