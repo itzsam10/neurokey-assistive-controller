@@ -15,7 +15,7 @@ Board revisions, electrical ratings, motor-driver type, and battery details will
 
 ## Headset prototype
 
-The current white headset was printed as an early mechanical prototype using a design adapted from an OpenBCI 3D-printable headset. It is being used to study fit, electrode-position access, cable routing, and possible mounting positions. The original geometry is not claimed as a NeuroKey design. The exact source model and licence must be confirmed before CAD/STL files are redistributed.
+The current white headset was printed as an early mechanical prototype based on the [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV). It is being used to study fit, electrode-position access, cable routing, and possible mounting positions. The original geometry is not claimed as a NeuroKey design. OpenBCI's Ultracortex repository identifies Aaron Trocola, Conor Russomanno, Joel Murphy, and Aaron Lehr as designers and engineers and distributes the files under the [GNU GPL v3.0 licence](https://github.com/OpenBCI/Ultracortex/blob/master/LICENSE.md).
 
 The printed surface contains visible support marks and rough areas. This is acceptable for checking geometry, but the frame requires finishing and a comfort/safety inspection before anyone wears it for testing.
 
