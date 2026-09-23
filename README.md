@@ -14,7 +14,7 @@ This project is under active development. The initial research, architecture, ha
 |---|---|
 | ![3D-printed OpenBCI-derived headset prototype](media/openbci-derived-headset-physical-prototype.png) | ![Headset and NeuroKey parts arranged in the slicer](media/openbci-derived-headset-print-bed.png) |
 
-The white headset is a locally printed prototyping frame adapted from an OpenBCI 3D-printable headset design. It gives the team a physical platform for studying electrode locations, fit, cable routing, and enclosure ideas. We do not claim the underlying headset geometry as our original design. The NeuroKey-labelled part shown in the slicer is a team-added prototype component. The exact upstream model and licence will be linked here after the original model page is confirmed.
+The white headset is a locally printed prototyping frame based on the [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV). It gives the team a physical platform for studying electrode locations, fit, cable routing, and enclosure ideas. We do not claim the underlying headset geometry as our original design. The NeuroKey-labelled part shown in the slicer is a team-added prototype component. The upstream Ultracortex repository is distributed under the GNU GPL v3.0 licence.
 
 | Conductive paste | Disposable gel electrodes |
 |---|---|
@@ -101,7 +101,7 @@ NeuroKey is an academic prototype. It is not a clinically validated medical devi
 
 ## Credits
 
-- OpenBCI community: source concept for the 3D-printable headset frame used in early mechanical prototyping. Exact model attribution and licence link are being confirmed.
+- [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex): source design for the 3D-printed headset frame, distributed under the [GNU GPL v3.0 licence](https://github.com/OpenBCI/Ultracortex/blob/master/LICENSE.md). The Mark IV credits Aaron Trocola, Conor Russomanno, Joel Murphy, and Aaron Lehr as designers and engineers.
 - [Upside Down Labs](https://upsidedownlabs.tech/): NPG Lite Beast Pack hardware, firmware examples, documentation, and Chords signal-visualization tools.
 - NeuroKey team: system integration, printed prototype work, calibration workflow, accessible control logic, output integration, and project validation.
 
