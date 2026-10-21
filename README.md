@@ -1,88 +1,100 @@
 # NeuroKey
 
-NeuroKey is a final-year engineering prototype exploring accessible control for people with severe motor impairments. The proposed system combines biosignals with a small wireless controller for low-voltage demonstrations. It is an academic prototype, not a medical device or powered-wheelchair controller.
+**NeuroKey** is a final-year engineering prototype exploring accessible control for people with severe motor impairments. Its planned input sequence is **SSVEP mode selection → EOG menu navigation → forearm EMG confirmation**. A laptop currently handles acquisition and processing; local Wi-Fi outputs for a small car and low-voltage home demonstrator are future integration stages.
 
-## Current status
+This is a research prototype. It is not clinically validated and must not be used to control an occupied wheelchair or other safety-critical equipment.
 
-The team has an NPG Lite Beast Pack, Ten20 conductive paste, disposable gel electrodes, and a 3D-printed headset frame based on the OpenBCI Ultracortex design. The printed frame is for fit and electrode-placement prototyping; it does not mean EEG, EOG, or SSVEP control is working.
+## Current project status — 21 October 2026
 
-The active acquisition route for current forearm EMG work is **Beast Pack BLE → ChordsPy → LSL → laptop**. Preliminary clench detection has been demonstrated on the laptop. False activations have occurred during lead movement and ordinary arm movement. One-shot latching and command-context gating are planned; false-trigger testing and physical output integration remain in progress.
+### Demonstrated
 
-The laptop detector has sent UDP datagrams locally, but the ESP32 receiver and relay were not powered or listening during that test. Physical packet receipt and actuation have not been verified. A car platform has not yet been built or integrated.
+- NPG Lite Beast Pack firmware was flashed and connected over Bluetooth.
+- Signals were viewed in Chords Web and later acquired through the **ChordsPy BLE → LSL → laptop** route.
+- Forearm contraction changed the recorded EMG waveform. Releasing, moving a lead, ordinary arm movement, and touching electrode snaps can also produce large changes.
+- Rest and contraction recordings have been saved. One 22,500-sample laptop session contains nine paired rest/contraction trials.
+- A laptop detector has sent UDP datagrams in a local software test. The ESP32 receiver and relay were not powered or listening, so packet receipt and physical actuation are unverified.
+- An OpenBCI-derived headset frame was 3D printed as an early mechanical prototype. It is retained as project history; the current roadmap does not depend on that frame.
+
+### In progress
+
+- Repeat EMG trials with clear labels and separate recording sessions.
+- Replace cooldown-only repeat suppression with one-shot latch and quiet-release re-arming.
+- Quantify false activations during ordinary arm activity and lead movement.
+- Record EOG deliberately, then test EOG menu navigation.
+- Add a two-second EMG confirmation window after a menu option is focused.
+
+### Not yet demonstrated
+
+- Reliable EOG classification or an EOG-controlled menu.
+- Scalp EEG validation or SSVEP selection.
+- The two-second command gate and emergency-stop arbitration.
+- ESP32 receipt, relay switching, home-load operation, or car movement.
+- End-to-end multimodal control.
+
+## Planned interaction
+
+```text
+Look at a flickering target to select a mode (SSVEP — later stage)
+                         ↓
+Move eyes to navigate and focus an action (EOG — planned)
+                         ↓
+Focused action opens a 2-second confirmation window (planned)
+                         ↓
+Forearm contraction confirms; emergency-stop rule can override (EMG)
+                         ↓
+Laptop sends a bounded Wi-Fi command to a low-voltage demonstrator
+```
+
+The modules will be tested separately and joined with a deterministic state machine. The laptop remains the signal-processing host for this prototype. Standalone processing on an embedded controller is a later research option, not a current claim.
+
+## First results and limits
+
+The 21 Chords Web files currently analyzed comprise 10 relaxed recordings and 11 fist-labelled recordings. An exploratory 20–150 Hz bandpass plus 50 Hz notch analysis produced a difference in RMS distributions, with substantial overlap. The time axis assumes 500 Hz and the sample-counter anomalies have not yet been fully resolved. These recordings are useful for choosing the next tests; they are not a validated event classifier.
+
+A separate 21 October session contains 11,250 relaxed and 11,250 contraction-labelled samples arranged as nine paired trials. In that session, active RMS exceeded rest RMS in all nine pairs (ratios 1.83×–5.22×). This is a within-session signal check, not a false-trigger or cross-session accuracy result. See [results/README.md](results/README.md).
+
+A development run reported **94.44% hold-out window accuracy** from a random 80/20 split of 50%-overlapping windows. It is not cross-validation and does not estimate new-session performance. Adjacent windows can be similar, and the current training/live window lengths differ. Treat the score as preliminary software feedback only.
+
+False activations have occurred during lead movement and ordinary arm movement. No validated false-activation rate, sensitivity, specificity, user-level reliability, or physical output performance is available. Earlier claims of “zero false triggers,” “artifact-immune” operation, or measured sub-millisecond UDP latency are unsupported and should not be repeated.
+
+## Development order
+
+1. Verify clean, repeatable EMG acquisition and preserve labelled recordings.
+2. Compare a simple calibrated detector with the current SVM; validate using held-out sessions and artifact negatives.
+3. Implement and test one-shot latching and release-to-rearm.
+4. Record horizontal and vertical EOG and create a menu that can reject ambiguous input.
+5. Test manual Wi-Fi commands with the receiver and a safe low-voltage indicator/load, without biosignal control.
+6. Add the two-second EMG confirmation gate and test timeout, STOP, and connection-loss behavior.
+7. Validate scalp EEG with an eyes-open/eyes-closed alpha test; only then begin one-target and multi-target SSVEP/FBCCA experiments.
+8. Integrate the modalities and demonstrate scripted tasks on a stationary low-voltage home model and an unoccupied small car.
+
+The original handoff lists initial goals of ≥95% EMG event detection with ≤1 false confirmation per five minutes, ≥90% held-out EOG balanced accuracy, 75–80% four-target SSVEP accuracy with rejection, and ≥90% scripted integrated task completion. These are future evaluation targets, not measured results.
+
+## Repository map
+
+- `docs/` — current status, roadmap, and bring-up steps
+- `hardware/` — known inventory and items that still need label/rating verification
+- `software/` — laptop-side development pipeline and its limitations
+- `signal-processing/` — analysis notes and reproducible summary tools
+- `results/` — aggregate plots and measured trial summaries; raw physiological recordings are kept out of the public repo
+- `firmware/` — status of embedded output integration
+- `media/` — prototype and experiment photographs
 
 ## Prototype photos
 
-| Printed OpenBCI-derived headset | Print preparation |
+| Early printed headset frame | Forearm EMG electrode arrangement |
 |---|---|
-| ![3D-printed headset frame](media/openbci-derived-headset-physical-prototype.png) | ![Headset parts arranged in the slicer](media/openbci-derived-headset-print-bed.png) |
+| ![OpenBCI-derived mechanical headset prototype](media/openbci-derived-headset-physical-prototype.png) | ![Forearm electrode arrangement during EMG recording](media/forearm-emg-electrode-setup.jpg) |
 
-| Ten20 conductive paste | Disposable gel electrodes |
-|---|---|
-| ![Ten20 conductive electrode paste](media/ten20-conductive-paste.png) | ![Disposable snap gel electrodes](media/disposable-gel-electrodes.png) |
+The headset was printed as a mechanical study piece based on the [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV). It is not currently required for the EMG/EOG work. Additional photos show print preparation, Ten20 paste, and the disposable electrodes.
 
-These photos document the printed frame and acquired consumables; they are not evidence of completed EEG, EOG, or SSVEP testing.
+## Credits
 
-## Proposed interaction
-
-```text
-SSVEP: choose a control mode (planned)
-        ↓
-EOG: navigate and focus an option (planned)
-        ↓
-Focused option opens a 2-second confirmation window (planned)
-        ↓
-Forearm EMG: confirm only while the window is open (planned)
-        ↓
-Wi-Fi command to a low-voltage demonstrator (not end-to-end tested)
-```
-
-The two-second gate is a design proposal, not an implemented or validated feature. It should reduce unintended commands during navigation, but cannot by itself prove intent. An accessible assistance request and a stop/timeout behavior should remain available.
-
-## Results and evidence limits
-
-A development run reported **94.44% hold-out test accuracy** using a random 80/20 split of 250-sample windows with 50% overlap. This is not cross-validation and does not estimate performance on a new session: adjacent overlapping windows can be highly similar, and the split did not hold out complete sessions. Treat it as preliminary software feedback only. Session-grouped validation remains to be done.
-
-There is no validated false-activation rate, sensitivity, specificity, or user-level reliability result yet. Earlier descriptions such as “zero false triggers,” “artifact-immune,” or measured sub-millisecond command latency are not supported by current evidence. The local UDP test did not verify ESP32 receipt, relay switching, car movement, or home-control action.
-
-## Development stages
-
-1. **EMG acquisition and detector:** continue with ChordsPy/LSL; stabilize electrodes and leads; record rest, intended confirmation, ordinary arm movement, and lead-motion examples. The team is integrating one-shot latching: a sustained clench should fire once and quiet rest should be required to re-arm.
-2. **Command context:** add EOG menu navigation and a 2-second confirmation window; evaluate EMG only while an option is focused and the gate is open.
-3. **Output bench test:** test wireless commands without biosignal control, first with a safe low-voltage indicator/load. Verify STOP, timeout, Wi-Fi loss, and restart behavior.
-4. **Small mobility demonstrator:** build or adapt a small unoccupied car platform only after the output stage passes. Test with wheels raised first and at low speed in a clear area. Do not connect this prototype to a powered wheelchair.
-5. **SSVEP and integration:** add SSVEP mode selection after EOG and EMG are individually repeatable. Validate each modality alone, then test the integrated state sequence with held-out sessions and logged failures.
-
-Report trial count and duration, session split, intended-action detection, false activations per test duration, response time, and invalid/dropped signal periods. Mark a stage complete only when its pass criteria and evidence are recorded.
-
-## Software bring-up
-
-The active EMG acquisition route is **ChordsPy BLE → LSL → laptop**. From the project root, start the bridge in one terminal:
-
-```powershell
-python -m chordspy.connection --protocol ble
-```
-
-Then start the pipeline in another terminal:
-
-```powershell
-python software/unified_pipeline.py
-```
-
-The direct Bleak script, `neurokey_direct_ble.py`, was an early exploratory route with packet loss and operating-system GATT disconnects; it is not the active acquisition path. See [docs/START_HERE.md](docs/START_HERE.md).
-
-## Hardware and open-source credits
-
-- **Acquisition:** NPG Lite Beast Pack by [Upside Down Labs](https://upsidedownlabs.tech/); Ten20 paste and disposable gel electrodes are used in signal experiments.
-- **Headset frame:** the printed frame is derived from the [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV). NeuroKey does not claim the underlying geometry as original. The team-added NeuroKey-labelled component and local print work are prototype contributions. Follow the upstream [GNU GPL v3.0 license](https://github.com/OpenBCI/Ultracortex/blob/master/LICENSE.md) for redistributed derivatives.
-- **Software references:** [Chords-Python](https://github.com/upsidedownlabs/Chords-Python), [NPG Lite documentation](https://docs.upsidedownlabs.tech/hardware/bioamp/neuro-play-ground-lite/index.html), and Upside Down Labs' open hardware/software examples. Adapted work must retain source attribution and license notices.
+- **OpenBCI Ultracortex Mark IV:** source design for the early printed headset frame, under the [GNU GPL v3.0](https://github.com/OpenBCI/Ultracortex/blob/master/LICENSE.md). The team does not claim the upstream geometry as original.
+- **Upside Down Labs:** NPG Lite Beast Pack, firmware and hardware documentation, and Chords tools. See [NPG Lite documentation](https://docs.upsidedownlabs.tech/hardware/bioamp/neuro-play-ground-lite/index.html) and [Chords-Python](https://github.com/upsidedownlabs/Chords-Python).
+- **NeuroKey team:** project-specific data collection, analysis, control logic, system integration, and prototype work.
 
 ## Team
 
-- Samith R
-- Nithin Patel GB
-- Rajmohan RA
-- Suhas RM
-
-## Scope and safety
-
-NeuroKey is not clinically evaluated and is not suitable for controlling a person's wheelchair or other safety-critical equipment. Human-connected signal recording must use the battery-powered, isolated acquisition device as intended; do not connect electrodes to mains-powered circuits. Early actuator tests should use a low-voltage bench load or an unoccupied small platform, with a physical stop and time-limited commands.
+Samith R · Nithin Patel GB · Rajmohan RA · Suhas RM
+East Point College of Engineering and Technology, Bengaluru

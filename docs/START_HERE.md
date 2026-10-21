@@ -1,66 +1,48 @@
-# NeuroKey: current bring-up notes
+# NeuroKey bring-up: current laptop EMG route
 
-This page records the current development route and what remains unverified. It is intended to help reproduce the laptop-side EMG test without presenting future stages as completed.
+This guide covers the current laptop-side EMG test. It does not start EOG, SSVEP, the output node, or a car.
 
-## Current status
+## Current signal path
 
-- Active route: **NPG Lite Beast Pack → BLE → ChordsPy → LSL → laptop**.
-- Preliminary forearm clench detection has been demonstrated on the laptop.
-- False activations have occurred during lead movement and ordinary arm movement.
-- The laptop sent UDP command datagrams locally. The physical ESP32 receiver and relay were not powered or listening, so end-to-end actuation has not been demonstrated.
+```text
+NPG Lite Beast Pack → Bluetooth LE → ChordsPy → LSL → laptop pipeline
+```
 
-The direct Bleak script (`neurokey_direct_ble.py`) was an early experiment with packet loss and operating-system GATT disconnects. Use the ChordsPy/LSL bridge for current acquisition.
+Use the NPG Lite on battery as intended. Place and secure electrodes according to the manufacturer's EMG setup guidance. Keep leads from tugging, support the arm, and do not touch exposed snaps during acquisition. A snap touch or cable pull can create a large artifact that resembles a command.
 
-## Start the EMG pipeline
+## Start the stream and pipeline
 
-From the repository root, use the Python environment where project dependencies are installed.
-
-**Terminal 1 — BLE-to-LSL bridge:**
+From the repository root, start the verified bridge in one terminal:
 
 ```powershell
 python -m chordspy.connection --protocol ble
 ```
 
-Connect to the NPG Lite if prompted and leave the bridge running. Confirm that it reports a live stream.
-
-**Terminal 2 — NeuroKey pipeline:**
+Connect to the Beast Pack if prompted and wait for the LSL stream. In a second terminal, start the laptop pipeline:
 
 ```powershell
 python software/unified_pipeline.py
 ```
 
-Run diagnostics first. Check the signal at rest and during a comfortable forearm contraction. A large spike alone does not prove a clean muscle signal: touching a snap, pulling a lead, shifting the arm, or changing electrode contact can also cause large changes.
+Run diagnostics first. Record labelled rest and comfortable forearm contractions. Preserve raw files unchanged and note electrode placement, action, session, and any movement or connection issue.
 
-For each recording, keep the arm supported, avoid touching electrode snaps, secure leads to reduce tugging, and note the action, trial, electrode placement, and any movement or connection interruption. Preserve raw recordings unchanged; analyze copies and retain session labels.
+The direct Bleak script `neurokey_direct_ble.py` was an early exploratory route with packet loss and operating-system GATT disconnects; it is not the active acquisition route.
 
-## Detector and planned features
+## Current limitations
 
-The current prototype uses filtered EMG features with a trained classifier/threshold to detect a clench-like event. It can still respond to non-command activity. The team is integrating one-shot latching: a sustained event should fire once, and quiet release should be required before re-arming.
+- Preliminary clench detection runs on the laptop and has produced false activations during lead movement and ordinary arm movement.
+- The code's cooldown is not the one-shot latch described in the roadmap.
+- The reported 94.44% score is random overlapping-window hold-out accuracy. It is not cross-validation or new-session performance.
+- Training features use 500 ms windows, while live inference currently uses 150 ms windows; resolve this mismatch before relying on the score.
+- Local UDP sends were exercised without a powered/listening ESP32 receiver. Do not connect this prototype to a car motor or occupied mobility device.
 
-These features are planned, not yet verified:
+## Next checks
 
-- Latch and release-state behavior in the live pipeline.
-- EOG navigation followed by a 2-second window in which EMG confirmation is enabled.
-- EOG, SSVEP, and multimodal integration.
-- ESP32 receipt of the laptop's UDP command and physical relay response.
-- Car or home-load control.
+1. Repeat labeled EMG capture after electrode reapplication and include ordinary movement and lead-motion negatives.
+2. Verify the training/live window design and compare thresholds with the SVM using held-out sessions.
+3. Test one-shot latch and release-to-rearm on logs before allowing commands.
+4. Record EOG separately, then test left/right and up/down navigation with a neutral/reject state.
+5. Test manual Wi-Fi commands with a safe low-voltage indicator/load. Confirm STOP, timeout, and Wi-Fi loss before connecting any movement load.
+6. Add the 2-second EOG-focus/EMG-confirm gate. Attempt EEG/SSVEP only after EOG and EMG stages pass their own checks.
 
-Do not present the reported 94.44% random-window hold-out result as cross-validation or expected performance on a new session. Its windows overlap by 50%, so adjacent windows may be similar. Validation must hold out complete sessions and include ordinary movement and lead-motion negatives. Report false activations with a defined test duration; do not claim a zero rate.
-
-## Recommended next checks
-
-1. Reproduce the live EMG stream and save a labeled rest/contraction recording.
-2. Repeat with fresh electrode placement in a separate session. Include ordinary arm movements and safe lead-motion tests as negative examples.
-3. Verify the latch on recorded and live data before sending commands. A sustained contraction must fire once; re-arming must require release.
-4. Test UDP reception with the ESP32 and a safe low-voltage indicator/load, without biosignal control. Check STOP, timeout, and Wi-Fi-loss behavior.
-5. After those checks pass, combine the EMG event with the 2-second EOG confirmation gate.
-6. Add SSVEP and a small unoccupied car demonstrator as later stages; test each modality alone before integration.
-
-Never connect this prototype to a person's powered wheelchair. Keep early output tests low-voltage, stationary, and supervised. Do not wire a microcontroller GPIO directly to a motor, relay coil, or battery voltage.
-
-## References
-
-- [NPG Lite Beast Pack](https://docs.upsidedownlabs.tech/kits/npg-lite-kits/npg-lite-beast/index.html)
-- [Chords-Python](https://github.com/upsidedownlabs/Chords-Python)
-- [NPG Lite board documentation](https://docs.upsidedownlabs.tech/hardware/bioamp/neuro-play-ground-lite/index.html)
-- [OpenBCI Ultracortex Mark IV design](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV)
+Never connect this prototype to a person's powered wheelchair. Keep early actuator tests low-voltage, stationary, and supervised.

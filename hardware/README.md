@@ -1,31 +1,28 @@
-# Hardware
+# Hardware inventory and status
 
-## Available project hardware
+Only use ratings confirmed from the physical board labels and manufacturer documentation. This list records the team's reported inventory; unknown electrical ratings remain unknown until photographed and checked.
 
-- NPG Lite Beast Pack biosignal-acquisition kit
-- Ten20 conductive electrode paste
-- Surface gel electrodes
-- Gold electrodes reported for later EEG experiments
-- 3D-printed headset prototyping frame
-- NodeMCU development board
-- Relay module and jumper wires
-- Miniature car/chassis available for inspection and rebuilding
+## Biosignal acquisition
 
-Board revisions, electrical ratings, motor-driver type, and battery details will be added only after the labels have been physically checked.
+- **NPG Lite Beast Pack:** firmware flashed; BLE signal display and ChordsPy/LSL laptop acquisition demonstrated.
+- **Electrodes and paste:** Ten gold electrodes, disposable gel electrodes, and Ten20 paste are available. Forearm EMG has been recorded with surface electrodes. Gold-cup scalp EEG has not been validated.
+- **Printed headset:** an OpenBCI Ultracortex-derived frame has been printed. It is an early mechanical study model and is not a required part of the current EMG/EOG stage. Do not assume it fits the gold electrodes or has been validated for EEG.
 
-## Headset prototype
+## Output and mobility parts
 
-The current white headset was printed as an early mechanical prototype based on the [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV). It is being used to study fit, electrode-position access, cable routing, and possible mounting positions. The original geometry is not claimed as a NeuroKey design. OpenBCI's Ultracortex repository identifies Aaron Trocola, Conor Russomanno, Joel Murphy, and Aaron Lehr as designers and engineers and distributes the files under the [GNU GPL v3.0 licence](https://github.com/OpenBCI/Ultracortex/blob/master/LICENSE.md).
+Reported as available or intended for the later demonstrator:
 
-The printed surface contains visible support marks and rough areas. This is acceptable for checking geometry, but the frame requires finishing and a comfort/safety inspection before anyone wears it for testing.
+- NodeMCU ESP8266 development board.
+- HW-130 motor-driver board (exact model/revision and ratings still need a clear label check).
+- Four dual-shaft DC gear motors (voltage/current ratings not recorded here).
+- Relay module and jumper wires (input voltage and contact ratings unverified).
+- A friend's small car/chassis may be available as a base; the project car has not been built or wired.
+- No verified motor battery/power solution has been selected for the four-motor platform.
 
-## Acquisition platform
+The old sealed lead-acid battery measured about 0.64 V and should be treated as unusable pending proper battery testing/replacement. Do not use the old power bank or an unverified battery as the motor supply. Before ordering or wiring a supply, record motor rated voltage and stall current, driver continuous/peak current, battery chemistry/series count, connector polarity, and an appropriate fuse.
 
-The NPG Lite Beast Pack is an open-source biosignal development platform from Upside Down Labs. Official documentation describes six input channels and electrode configurations for EMG, EOG, and EEG. NPG Lite firmware and Chords are being used as the acquisition and visualization foundation. NeuroKey will modify and integrate only the parts required for its calibrated assistive-control workflow.
+## Safe output architecture
 
-References:
+The ESP8266/ESP32 GPIO must only drive a compatible logic input or a properly designed driver stage; it must not directly drive a motor, relay coil, or battery voltage. Test the receiver first with a low-voltage indicator/load, with the motor stage disconnected. Use explicit commands such as `MOTOR_STOP`, bounded movement time, a local watchdog timeout, and a physical stop. Avoid toggle-only commands for motion or safety outputs.
 
-- [NPG Lite Beast Pack documentation](https://docs.upsidedownlabs.tech/kits/npg-lite-kits/npg-lite-beast/index.html)
-- [NPG Lite Arduino firmware](https://github.com/upsidedownlabs/NPG-Lite-Arduino-Firmware)
-- [Chords Web](https://chords.upsidedownlabs.tech/)
-
+No physical output test has been completed. See [firmware status](../firmware/README.md).
