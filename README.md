@@ -51,6 +51,8 @@ The modules will be tested separately and joined with a deterministic state mach
 
 The 21 Chords Web files currently analyzed comprise 10 relaxed recordings and 11 fist-labelled recordings. An exploratory 20–150 Hz bandpass plus 50 Hz notch analysis produced a difference in RMS distributions, with substantial overlap. The time axis assumes 500 Hz and the sample-counter anomalies have not yet been fully resolved. These recordings are useful for choosing the next tests; they are not a validated event classifier.
 
+![Exploratory RMS distribution for relaxed and fist-labelled recordings](results/emg_initial_analysis/rms_distribution.png)
+
 A separate 21 October session contains 11,250 relaxed and 11,250 contraction-labelled samples arranged as nine paired trials. In that session, active RMS exceeded rest RMS in all nine pairs (ratios 1.83×–5.22×). This is a within-session signal check, not a false-trigger or cross-session accuracy result. See [results/README.md](results/README.md).
 
 A development run reported **94.44% hold-out window accuracy** from a random 80/20 split of 50%-overlapping windows. It is not cross-validation and does not estimate new-session performance. Adjacent windows can be similar, and the current training/live window lengths differ. Treat the score as preliminary software feedback only.
@@ -82,11 +84,19 @@ The original handoff lists initial goals of ≥95% EMG event detection with ≤1
 
 ## Prototype photos
 
-| Early printed headset frame | Forearm EMG electrode arrangement |
+| Printed OpenBCI-derived headset | Headset print preparation |
 |---|---|
-| ![OpenBCI-derived mechanical headset prototype](media/openbci-derived-headset-physical-prototype.png) | ![Forearm electrode arrangement during EMG recording](media/forearm-emg-electrode-setup.jpg) |
+| ![Printed headset frame](media/openbci-derived-headset-physical-prototype.png) | ![Headset parts arranged in the slicer](media/openbci-derived-headset-print-bed.png) |
 
-The headset was printed as a mechanical study piece based on the [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV). It is not currently required for the EMG/EOG work. Additional photos show print preparation, Ten20 paste, and the disposable electrodes.
+| Ten20 conductive paste | Disposable gel electrodes |
+|---|---|
+| ![Ten20 electrode paste](media/ten20-conductive-paste.png) | ![Disposable snap gel electrodes](media/disposable-gel-electrodes.png) |
+
+| Forearm EMG electrode setup |
+|---|
+| ![Forearm electrode placement during recording](media/forearm-emg-electrode-setup.jpg) |
+
+The headset was printed as a mechanical study piece based on the [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV). It is not currently required for the EMG/EOG work. The reported 94.44% development score is shown as text above, not as an accuracy graphic: it came from a random overlapping-window split and is not validated new-session performance.
 
 ## Credits
 
