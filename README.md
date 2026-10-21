@@ -10,6 +10,18 @@ The active acquisition route for current forearm EMG work is **Beast Pack BLE â†
 
 The laptop detector has sent UDP datagrams locally, but the ESP32 receiver and relay were not powered or listening during that test. Physical packet receipt and actuation have not been verified. A car platform has not yet been built or integrated.
 
+## Prototype photos
+
+| Printed OpenBCI-derived headset | Print preparation |
+|---|---|
+| ![3D-printed headset frame](media/openbci-derived-headset-physical-prototype.png) | ![Headset parts arranged in the slicer](media/openbci-derived-headset-print-bed.png) |
+
+| Ten20 conductive paste | Disposable gel electrodes |
+|---|---|
+| ![Ten20 conductive electrode paste](media/ten20-conductive-paste.png) | ![Disposable snap gel electrodes](media/disposable-gel-electrodes.png) |
+
+These photos document the printed frame and acquired consumables; they are not evidence of completed EEG, EOG, or SSVEP testing.
+
 ## Proposed interaction
 
 ```text
