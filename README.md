@@ -12,7 +12,7 @@ This is a research prototype. It is not clinically validated and must not be use
 - Signals were viewed in Chords Web and later acquired through the **ChordsPy BLE → LSL → laptop** route.
 - Forearm contraction changed the recorded EMG waveform. Releasing, moving a lead, ordinary arm movement, and touching electrode snaps can also produce large changes.
 - Rest and contraction recordings have been saved. One 22,500-sample laptop session contains nine paired rest/contraction trials.
-- A laptop detector has sent UDP datagrams in a local software test. The ESP32 receiver and relay were not powered or listening, so packet receipt and physical actuation are unverified.
+- A laptop detector has sent UDP datagrams in a local software test. The ESP32 receiver and relay were not powered or listening, so packet receipt and physical actuation are unverified. The published experimental code keeps UDP output off unless the operator explicitly enables it.
 - An OpenBCI-derived headset frame was 3D printed as an early mechanical prototype. It is retained as project history; the current roadmap does not depend on that frame.
 
 ### In progress

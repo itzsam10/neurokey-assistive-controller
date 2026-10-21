@@ -1,6 +1,6 @@
 # NeuroKey project status
 
-**Updated:** 21 October 2026
+**Updated:** 21 October 2026  
 **Project stage:** laptop-side EMG development; multimodal integration has not started.
 
 ## Roadmap

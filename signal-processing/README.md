@@ -16,6 +16,8 @@ The training code makes 250-sample (500 ms at nominal 500 Hz) windows with 50% o
 
 The live detector currently computes its features from 0.15-second windows, unlike the 0.5-second training windows. The 94.44% result should not be interpreted as live-controller accuracy until the mismatch is fixed and a session-grouped evaluation is run.
 
+The experimental training routine also needs a review of how it forms windows across class transitions and concatenated files; its current split is not grouped by session. Live acquisition pads a timed-out partial window with zeros, so incomplete windows should be rejected before performance testing.
+
 The current feature detector has a cooldown but no verified one-shot latch. Clench-like threshold activity is not proof of user intent. Measure event recall, missed events, false activations per test duration, and latency against ordinary movement and lead-motion negatives.
 
 ## Exploratory Chords Web analysis

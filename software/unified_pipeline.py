@@ -80,9 +80,9 @@ def interactive_diagnostics(inlet, zi):
     if avg_rms > 45.0:
         print(" ❌ FAIL: Baseline > 45 RMS. Unplug charger & press REF gel pad firmly.")
         return False, avg_rms, zi
-    print(" ✅ PASS: Clean baseline confirmed.")
+    print(" Baseline is below the configured threshold; this is not a signal-quality validation.")
 
-    print("\n👉 CLENCH your fist or TAP the forearm gel pad NOW (8s timeout)...")
+    print("\n👉 Gently clench and hold the forearm muscle (8s timeout). Do not tap or touch the electrode snap.")
     t0 = time.time()
     while time.time() - t0 < 8.0:
         rms, _, _, _, zi = sample_window(inlet, zi, duration_sec=0.25)
@@ -90,7 +90,7 @@ def interactive_diagnostics(inlet, zi):
         print(f"  Live RMS: {rms:5.1f} | {bar:<30}", end="\r")
         if rms > max(55.0, avg_rms * 2.0):
             beep(1200, 200)
-            print(f"\n\n ✅ PASS: Spike detected ({rms:.1f} RMS). Hardware locked in!")
+            print(f"\n\n Signal-level change observed ({rms:.1f} RMS); this does not identify its cause.")
             return True, avg_rms, zi
 
     print("\n ❌ FAIL: No spike detected on Pin A5. Check snap wire.")
@@ -232,8 +232,11 @@ def live_inference(inlet, zi):
         thresh = float(f.read().strip())
 
     thresh = float(np.clip(thresh, 1.80, 2.40))
-    ip = input(f"ESP32 IP (Enter for {ESP32_IP}): ").strip() or ESP32_IP
-    udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    enable_udp = input("Enable experimental UDP output? Type SEND to enable it; anything else keeps it off: ").strip() == "SEND"
+    ip = (input(f"ESP32 IP (Enter for {ESP32_IP}): ").strip() or ESP32_IP) if enable_udp else None
+    udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) if enable_udp else None
+    if not enable_udp:
+        print("UDP output is disabled; the pipeline will only display local threshold events.")
 
     while True:
         print("\nLocking 3s rest baseline... KEEP FOREARM STILL ON DESK.")
@@ -247,9 +250,9 @@ def live_inference(inlet, zi):
         break
 
     base_rms = max(10.0, base_rms)
-    print(f"✅ Baseline Locked: {base_rms:.1f} RMS | Hard Trigger Ratio: {thresh:.2f}x")
+    print(f"Baseline captured: {base_rms:.1f} RMS | Experimental threshold ratio: {thresh:.2f}x")
     print("=== EXPERIMENTAL EMG DETECTOR (FALSE TRIGGERS OBSERVED) ===")
-    print("Shake wire, move arm, or clench to test.\n")
+    print("Keep actuators disconnected while testing. Lead or arm movement can trigger events.\n")
 
     streak = 0
     cooldown = 0
@@ -261,21 +264,23 @@ def live_inference(inlet, zi):
 
             prob = clf.predict_proba([[ratio, wl_ratio, rms]])[0][1]
 
-            # IMMUNITY LOGIC:
-            # Wire shakes have high peak/transient but FAIL the high-frequency Waveform Length ratio.
-            # Real clench requires BOTH high RMS ratio (> thresh) AND active Waveform density (wl_ratio > 1.35)
-            is_real_contraction = (ratio >= thresh) and (wl_ratio >= 1.35) and (prob >= 0.70)
+            # These criteria detect a clench-like feature pattern; they do not establish user intent.
+            meets_event_criteria = (ratio >= thresh) and (wl_ratio >= 1.35) and (prob >= 0.70)
 
             if cooldown > 0:
                 cooldown -= 1
                 status = "⏳ COOLDOWN"
-            elif is_real_contraction:
+            elif meets_event_criteria:
                 streak += 1
-                status = f"🔥 CLENCH ({streak * 0.15:.2f}s)"
+                status = f"⚠️ EVENT CRITERIA ({streak * 0.15:.2f}s)"
                 if streak >= 2:  # Sustained >= 0.30s
                     beep(1200, 200)
-                    udp_sock.sendto(b"TOGGLE_1", (ip, UDP_PORT))
-                    print(f"\n   ⚡ [EMG THRESHOLDS MET; UDP DATAGRAM SENT] -> (Ratio={ratio:.2f}x, WL_Ratio={wl_ratio:.2f}x, SVM={prob*100:.0f}%)")
+                    if udp_sock is not None:
+                        udp_sock.sendto(b"TOGGLE_1", (ip, UDP_PORT))
+                        outcome = "UDP datagram sent"
+                    else:
+                        outcome = "UDP disabled; local event only"
+                    print(f"\n   [THRESHOLD EVENT; {outcome}] (Ratio={ratio:.2f}x, WL_Ratio={wl_ratio:.2f}x, SVM={prob*100:.0f}%)")
                     streak = 0
                     cooldown = 6  # 0.9s cooldown
                     flush_stream(inlet)
@@ -287,6 +292,9 @@ def live_inference(inlet, zi):
             print(f" Ratio:{ratio:4.2f}x/{thresh:.2f}x | WL:{wl_ratio:4.2f}x | SVM:{prob*100:3.0f}% | {bar:<25} | {status:<24}", end="\r")
     except KeyboardInterrupt:
         print("\nStopped live controller.")
+    finally:
+        if udp_sock is not None:
+            udp_sock.close()
     return zi
 
 def main():
@@ -305,7 +313,7 @@ def main():
         print("1. Diagnostics (Noise Floor + Spike Check)")
         print("2. Record 3 Sessions + Train Scaled SVM")
         print("3. Train Scaled SVM on Clean Sessions Only")
-        print("4. Live Inference & Hardware Trigger")
+        print("4. Live Experimental Inference (may send UDP)")
         print("5. Exit")
         c = input("Select (1-5): ").strip()
 

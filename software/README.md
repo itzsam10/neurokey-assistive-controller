@@ -1,10 +1,10 @@
 # Laptop software
 
-`unified_pipeline.py` is a development snapshot of the laptop-side forearm EMG pipeline. It connects to the LSL stream, records labelled data, trains an RBF-SVM, and can dispatch a UDP datagram when its current event criteria are met.
+`unified_pipeline.py` is a development snapshot of the laptop-side forearm EMG pipeline. It connects to the LSL stream, records labelled data, and trains an RBF-SVM. UDP output is disabled by default and requires the operator to type `SEND` at the prompt.
 
-This snapshot is **experimental**. It has no verified one-shot latch or two-second EOG context gate, and its live 150 ms windows do not match the 500 ms windows used for training. The reported random-window score is not a new-session performance estimate. False activations have been observed during lead movement and ordinary arm movement.
+This snapshot is **experimental**. A threshold event does not prove user intent. It has no verified one-shot latch or two-second EOG context gate, and its live 150 ms windows do not match the 500 ms windows used for training. Training windows are randomly split rather than grouped by recording session; window construction also needs further review around label transitions and file boundaries. Timed-out live windows are zero-padded instead of rejected. The reported random-window score is not a new-session performance estimate. False activations have been observed during lead movement and ordinary arm movement.
 
-The UDP receiver and relay were not powered/listening during the local test. Keep any output disconnected while validating the detector. Do not use this code to control a powered wheelchair or safety-critical device.
+The UDP receiver and relay were not powered/listening during the local test. Keep any output disconnected while validating the detector, even though UDP is off by default. Do not use this code to control a powered wheelchair or safety-critical device.
 
 ## Run the laptop prototype
 
