@@ -1,92 +1,68 @@
 # NeuroKey
 
-NeuroKey is our final-year engineering project exploring a low-cost assistive control system for people who have difficulty using conventional switches, remotes, or joysticks.
-
-The system is being designed to read a voluntary eye, blink, jaw, or facial-muscle signal through an NPG Lite Beast Pack. A reliable detected action can then be used to navigate a simple menu and operate a low-voltage home-control demonstration, request caregiver assistance, or control a small mobility prototype.
+NeuroKey is a final-year engineering prototype exploring accessible control for people with severe motor impairments. The proposed system combines biosignals with a small wireless controller for low-voltage demonstrations. It is an academic prototype, not a medical device or powered-wheelchair controller.
 
 ## Current status
 
-This project is under active development. The initial research, architecture, hardware selection, 3D printing, and first EMG threshold experiments have been completed. Repeated signal testing and threshold tuning are continuing before the detector is connected to any output device.
+The team has an NPG Lite Beast Pack, Ten20 conductive paste, disposable gel electrodes, and a 3D-printed headset frame based on the OpenBCI Ultracortex design. The printed frame is for fit and electrode-placement prototyping; it does not mean EEG, EOG, or SSVEP control is working.
 
-## Prototype photographs
+The active acquisition route for current forearm EMG work is **Beast Pack BLE → ChordsPy → LSL → laptop**. Preliminary clench detection has been demonstrated on the laptop. False activations have occurred during lead movement and ordinary arm movement. One-shot latching and command-context gating are planned; false-trigger testing and physical output integration remain in progress.
 
-| Physical headset prototype | Print preparation |
-|---|---|
-| ![3D-printed OpenBCI-derived headset prototype](media/openbci-derived-headset-physical-prototype.png) | ![Headset and NeuroKey parts arranged in the slicer](media/openbci-derived-headset-print-bed.png) |
+The laptop detector has sent UDP datagrams locally, but the ESP32 receiver and relay were not powered or listening during that test. Physical packet receipt and actuation have not been verified. A car platform has not yet been built or integrated.
 
-The white headset is a locally printed prototyping frame based on the [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV). It gives the team a physical platform for studying electrode locations, fit, cable routing, and enclosure ideas. We do not claim the underlying headset geometry as our original design. The NeuroKey-labelled part shown in the slicer is a team-added prototype component. The upstream Ultracortex repository is distributed under the GNU GPL v3.0 licence.
-
-| Conductive paste | Disposable gel electrodes |
-|---|---|
-| ![Ten20 conductive electrode paste](media/ten20-conductive-paste.png) | ![Disposable snap gel electrodes](media/disposable-gel-electrodes.png) |
-
-### Completed
-
-- Defined the problem and intended user group
-- Selected the NPG Lite Beast Pack for biosignal acquisition
-- Purchased gold electrodes and Ten20 conductive paste
-- Developed the initial system architecture and implementation plan
-- Created and 3D printed an early headset design
-- Completed initial jaw-EMG signal observation and threshold experiments
-- Defined safety and validation requirements
-
-### In progress
-
-- Repeating jaw-EMG trials across electrode placements and sessions
-- Tuning release thresholds, debounce timing, and false-trigger rejection
-- Recording and comparing eye-movement EOG signals
-- Documenting the remaining controller, relay, and mobility hardware
-
-### Planned
-
-- Standalone detection on the NPG Lite controller
-- Wireless communication with an output controller
-- Low-voltage home-control and caregiver-alert demonstrations
-- Safety-limited miniature mobility demonstration
-- Two-target SSVEP experiment
-- Repeatability, response-time, and false-activation testing
-
-## Proposed system
+## Proposed interaction
 
 ```text
-Electrodes
-    |
-    v
-NPG Lite Beast Pack
-    |
-    | signal filtering and intentional-action detection
-    v
-Wireless output controller
-    |
-    +-- low-voltage home-control demonstration
-    +-- caregiver assistance alert
-    +-- miniature mobility platform
+SSVEP: choose a control mode (planned)
+        ↓
+EOG: navigate and focus an option (planned)
+        ↓
+Focused option opens a 2-second confirmation window (planned)
+        ↓
+Forearm EMG: confirm only while the window is open (planned)
+        ↓
+Wi-Fi command to a low-voltage demonstrator (not end-to-end tested)
 ```
 
-A laptop will be used during development for viewing signals, saving recordings, and calibration. The main EOG/EMG demonstration is intended to run on the embedded controller without laptop-based inference.
+The two-second gate is a design proposal, not an implemented or validated feature. It should reduce unintended commands during navigation, but cannot by itself prove intent. An accessible assistance request and a stop/timeout behavior should remain available.
 
-## Hardware and open-source foundation
+## Results and evidence limits
 
-The acquisition platform is the **NPG Lite Beast Pack** from Upside Down Labs. The Beast Pack provides up to six biopotential channels for experiments involving signals such as EEG, EMG, and EOG. NPG Lite uses an ESP32-C6 controller and supports battery operation and wireless communication. The team is using electrodes and Ten20 conductive paste during signal-acquisition experiments.
+A development run reported **94.44% hold-out test accuracy** using a random 80/20 split of 250-sample windows with 50% overlap. This is not cross-validation and does not estimate performance on a new session: adjacent overlapping windows can be highly similar, and the split did not hold out complete sessions. Treat it as preliminary software feedback only. Session-grouped validation remains to be done.
 
-We are studying and adapting the open-source [NPG Lite Arduino firmware](https://github.com/upsidedownlabs/NPG-Lite-Arduino-Firmware) rather than presenting the complete acquisition stack as our own work. The repository includes useful reference implementations for EOG, EMG, filtering, blink detection, relay control, wireless car control, and a wheelchair simulator.
+There is no validated false-activation rate, sensitivity, specificity, or user-level reliability result yet. Earlier descriptions such as “zero false triggers,” “artifact-immune,” or measured sub-millisecond command latency are not supported by current evidence. The local UDP test did not verify ESP32 receipt, relay switching, car movement, or home-control action.
 
-[Chords Web](https://chords.upsidedownlabs.tech/) and the related Upside Down Labs software are used for visualizing and recording raw signals during development. NeuroKey's work is focused on user-specific calibration, command confirmation, accessible menu control, safety behaviour, output integration, and measured validation on our hardware.
+## Development stages
 
-## Why testing is taking time
+1. **EMG acquisition and detector:** continue with ChordsPy/LSL; stabilize electrodes and leads; record rest, intended confirmation, ordinary arm movement, and lead-motion examples. The team is integrating one-shot latching: a sustained clench should fire once and quiet rest should be required to re-arm.
+2. **Command context:** add EOG menu navigation and a 2-second confirmation window; evaluate EMG only while an option is focused and the gate is open.
+3. **Output bench test:** test wireless commands without biosignal control, first with a safe low-voltage indicator/load. Verify STOP, timeout, Wi-Fi loss, and restart behavior.
+4. **Small mobility demonstrator:** build or adapt a small unoccupied car platform only after the output stage passes. Test with wheels raised first and at low speed in a clear area. Do not connect this prototype to a powered wheelchair.
+5. **SSVEP and integration:** add SSVEP mode selection after EOG and EMG are individually repeatable. Validate each modality alone, then test the integrated state sequence with held-out sessions and logged failures.
 
-Biosignal thresholds cannot be selected from one successful recording. Signal amplitude changes with electrode position, skin contact, paste quantity, cable movement, facial movement, and electrode replacement. A threshold that detects a jaw contraction in one session may miss weaker actions or create false activations in another session. We are therefore repeating the tests, recording rest and intentional actions separately, and tuning activation threshold, release threshold, event duration, and debounce timing before connecting the detector to the relay or mobility prototype.
+Report trial count and duration, session split, intended-action detection, false activations per test duration, response time, and invalid/dropped signal periods. Mark a stage complete only when its pass criteria and evidence are recorded.
 
-No accuracy value is reported yet because the repeated validation dataset is still being collected.
+## Software bring-up
 
-## Repository layout
+The active EMG acquisition route is **ChordsPy BLE → LSL → laptop**. From the project root, start the bridge in one terminal:
 
-- `docs/` — architecture, design decisions, and project updates
-- `hardware/` — component information and 3D-model files
-- `firmware/` — embedded code for acquisition and output control
-- `signal-processing/` — analysis and calibration tools
-- `results/` — measured test results
-- `media/` — prototype photographs and demonstration media
+```powershell
+python -m chordspy.connection --protocol ble
+```
+
+Then start the pipeline in another terminal:
+
+```powershell
+python software/unified_pipeline.py
+```
+
+The direct Bleak script, `neurokey_direct_ble.py`, was an early exploratory route with packet loss and operating-system GATT disconnects; it is not the active acquisition path. See [docs/START_HERE.md](docs/START_HERE.md).
+
+## Hardware and open-source credits
+
+- **Acquisition:** NPG Lite Beast Pack by [Upside Down Labs](https://upsidedownlabs.tech/); Ten20 paste and disposable gel electrodes are used in signal experiments.
+- **Headset frame:** the printed frame is derived from the [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV). NeuroKey does not claim the underlying geometry as original. The team-added NeuroKey-labelled component and local print work are prototype contributions. Follow the upstream [GNU GPL v3.0 license](https://github.com/OpenBCI/Ultracortex/blob/master/LICENSE.md) for redistributed derivatives.
+- **Software references:** [Chords-Python](https://github.com/upsidedownlabs/Chords-Python), [NPG Lite documentation](https://docs.upsidedownlabs.tech/hardware/bioamp/neuro-play-ground-lite/index.html), and Upside Down Labs' open hardware/software examples. Adapted work must retain source attribution and license notices.
 
 ## Team
 
@@ -97,11 +73,4 @@ No accuracy value is reported yet because the repeated validation dataset is sti
 
 ## Scope and safety
 
-NeuroKey is an academic prototype. It is not a clinically validated medical device or a finished powered-wheelchair controller. Mobility testing is limited to a small, unoccupied platform. Human-connected signal recording is performed with battery-powered acquisition hardware, and all actuator demonstrations use low-voltage circuits.
-
-## Credits
-
-- [OpenBCI Ultracortex Mark IV](https://github.com/OpenBCI/Ultracortex): source design for the 3D-printed headset frame, distributed under the [GNU GPL v3.0 licence](https://github.com/OpenBCI/Ultracortex/blob/master/LICENSE.md). The Mark IV credits Aaron Trocola, Conor Russomanno, Joel Murphy, and Aaron Lehr as designers and engineers.
-- [Upside Down Labs](https://upsidedownlabs.tech/): NPG Lite Beast Pack hardware, firmware examples, documentation, and Chords signal-visualization tools.
-- NeuroKey team: system integration, printed prototype work, calibration workflow, accessible control logic, output integration, and project validation.
-
+NeuroKey is not clinically evaluated and is not suitable for controlling a person's wheelchair or other safety-critical equipment. Human-connected signal recording must use the battery-powered, isolated acquisition device as intended; do not connect electrodes to mains-powered circuits. Early actuator tests should use a low-voltage bench load or an unoccupied small platform, with a physical stop and time-limited commands.
